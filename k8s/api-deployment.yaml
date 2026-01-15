@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: threat-api
-        image: roeyaverbuch/threat-api:v18
+        image: roeyaverbuch/threat-api:v1
         ports:
         - containerPort: 8000
         env:
