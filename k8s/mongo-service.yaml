@@ -5,7 +5,7 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    app: mogodb
+    app: mongodb
   ports:
   - port: 27017
     targetPort: 27017
