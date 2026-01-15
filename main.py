@@ -2,6 +2,8 @@ from fastapi import FastAPI ,UploadFile ,HTTPException
 import pandas as pd
 import shutil
 import uvicorn
+from db import save_contact_to_db
+from models import Terrorist
 
 app = FastAPI()
 
@@ -14,9 +16,14 @@ def get_csv_file(file: UploadFile):
     validation(file=file)
     save_csv_local(file)
     df = load_file(file.filename)
+    
     df = data_manipulation(df)
+    terrorist_list = df_to_list_dict(df)
+    valid_list = basemodel_validation(terrorist_list)
+    res = res_format(valid_list)
+
     save_contact_to_db(df.to_json())
-    return df.to_json()
+    return res
 
 
     
@@ -46,39 +53,31 @@ def data_manipulation(df):
     df = df[["name","location","danger_rate"]]
     return df
 
+def df_to_list_dict(df):
+    terror = []
+    for col in df.values:
+        a= {}
+        a["name"] = col[0]
+        a["location"] = col[1]
+        a["danger_rate"] = col[2]
+        terror.append(a)
+    return terror    
 
-#--------------------------------------------------
-from pymongo import MongoClient 
-import os
-
-MONGO_HOST = os.getenv("MONGO_HOST","mongo-0.mongo-service")
-MONGO_PORT = os.getenv("MONGO_PORT" , 27017)
-MONGO_USERNAME = os.getenv("MONGO_USERNAME" , "admin")
-MONGO_PASSWORD = os.getenv("MONGO_PASSWORD","secretpass")
-MONGO_DB = os.getenv("MONGO_DB","threat_db")
-MONGO_AUTH_SOURCE = os.getenv("MONGO_AUTH_SOURCE","admin")
-
-def save_contact_to_db(data: dict):
+def basemodel_validation(terrorists:list[dict]):
+    res = []
+    for terrorist in terrorists:
         try:
-            client = MongoClient(
-                host=MONGO_HOST,
-                port=MONGO_PORT,
-                username=MONGO_USERNAME,
-                password=MONGO_USERNAME,
-                authSource=MONGO_AUTH_SOURCE
-            )
-          
-            db = client[MONGO_DB]
+            Terrorist(**terrorist)
+            res.append(terrorist)
+        except Exception:
+            pass
+    return res    
 
-            collection = db['top_threats']
 
-            result = collection.insert_one(data)
-            print(f"Inserted ID: {result.inserted_id}")
-
-        except Exception as e:
-            raise HTTPException(status_code=503,detail="Database unavailable")
-        
-
+def res_format(terrorists:list[dict]):
+    count = len(terrorists)
+    res = {"count":count,"top":terrorists}
+    return res
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0",port=8000 , reload=True)
