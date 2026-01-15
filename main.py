@@ -15,7 +15,7 @@ def get_csv_file(file: UploadFile):
     save_csv_local(file)
     df = load_file(file.filename)
     df = data_manipulation(df)
-    # save_contact_to_db(df.to_json())
+    save_contact_to_db(df.to_json())
     return df.to_json()
 
 
@@ -28,16 +28,16 @@ def validation(file):
         raise HTTPException(status_code=400,detail="Invalid CSV file")
     
 def save_csv_local(file):
-    filepath = file.filename
+    filepath = f"/tmp/{file.filename}"
 
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
 def load_file(file_name:str):
     if file_name.endswith(".csv"):
-        df = pd.read_csv(file_name)
+        df = pd.read_csv(f"/tmp/{file_name}")
     else:
-        df = pd.read_excel(file_name)
+        df = pd.read_excel(f"/tmp/{file_name}")
     return df
 
 def data_manipulation(df):
