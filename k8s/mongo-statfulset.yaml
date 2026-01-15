@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: registry.access.redhat.com/rhscl/mongodb-26-rhel7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+          - name: mongo-data
+            mountPath: /data/db
+          env:
+            - name: MONGODB_ADMIN_PASSWORD
+              value: "secretpass"
+            - name: MONGODB_USER
+              value: "admin"
+            - name: MONGODB_PASSWORD
+              value: "secretpass"
+            - name: MONGODB_DATABASE
+              value: "threat_db"
+
+
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+      labels:
+        app: mongodb
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

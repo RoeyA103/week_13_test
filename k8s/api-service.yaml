@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: threat-api-svc
+
+spec:
+  selector:
+    app: threat-api
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+
+

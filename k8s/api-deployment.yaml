@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threat-api
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threat-api
+  template:
+    metadata:
+      labels:
+        app: threat-api
+        tier: application
+    spec:
+      containers:
+      - name: threat-api
+        image: roeyaverbuch/threat-api:v18
+        ports:
+        - containerPort: 8000
+        env:
+          - name: DATABASE_PORT
+            value: "27017"
+          - name: DATABASE_HOST
+            value: "mogodb-0.mongodb-svc"
+          - name: MONGO_USERNAME
+            value: "admin" 
+          - name: MONGO_AUTH_SOURCE
+            value: "admin"
+          - name: MONGO_PASSWORD
+            value : "secretpass"
+          - name: MONGO_DB
+            value: "threat_db"  
+
+
+
+
+
+
