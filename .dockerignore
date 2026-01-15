@@ -1,0 +1,7 @@
+__pycache__/
+*.csv
+k8s/
+.gitignore
+commands.txt
+README.md
+screenshots/
