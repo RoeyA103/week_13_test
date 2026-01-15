@@ -1,0 +1,26 @@
+from root dir
+
+docker build -t {your-name}/{app-name}:v1 .
+docker push {your-name}/{app-name}:v1
+
+
+(after you log in to your openshift user from oc command)
+from k8s dir
+
+oc apply -f .
+
+chack pods
+oc get pods
+
+find api service
+oc get services
+
+expose 
+
+oc create route edge --service = {api-service-name}
+
+find the url
+
+oc routes
+
+walla
