@@ -4,7 +4,7 @@ metadata:
   name: threat-api
 
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: threat-api
@@ -16,25 +16,19 @@ spec:
     spec:
       containers:
       - name: threat-api
-        image: roeyaverbuch/threat-api:v1
+        image: roeyaverbuch/threat-api:v1.7
         ports:
         - containerPort: 8000
         env:
-          - name: DATABASE_PORT
-            value: "27017"
-          - name: DATABASE_HOST
-            value: "mogodb-0.mongodb-svc"
-          - name: MONGO_USERNAME
-            value: "admin" 
-          - name: MONGO_AUTH_SOURCE
-            value: "admin"
-          - name: MONGO_PASSWORD
-            value : "secretpass"
-          - name: MONGO_DB
-            value: "threat_db"  
-
-
-
-
-
-
+        - name: MONGO_PORT
+          value: "27017"
+        - name: MONGO_HOST
+          value: mongodb-0.mongodb-svc
+        - name: MONGO_USERNAME
+          value: admin
+        - name: MONGO_PASSWORD
+          value: secretpass
+        - name: MONGO_AUTH_SOURCE
+          value: admin
+        - name: MONGO_DB
+          value: threat_db

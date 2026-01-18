@@ -5,7 +5,8 @@ metadata:
   labels:
     app: mongodb
 spec:
-  replicas: 3
+  serviceName: mongodb-svc
+  replicas: 1
   selector:
     matchLabels:
       app: mongodb
@@ -16,21 +17,20 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: registry.access.redhat.com/rhscl/mongodb-26-rhel7
+          image: docker.io/library/mongo:6.0
           ports:
             - containerPort: 27017
           volumeMounts:
           - name: mongo-data
             mountPath: /data/db
-          env:
-            - name: MONGODB_ADMIN_PASSWORD
-              value: "secretpass"
-            - name: MONGODB_USER
-              value: "admin"
-            - name: MONGODB_PASSWORD
-              value: "secretpass"
-            - name: MONGODB_DATABASE
-              value: "threat_db"
+          env:   
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: "admin"
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: "secretpass"
+          - name: MONGO_INITDB_DATABASE
+            value: "threat_db"
+
 
 
   volumeClaimTemplates:

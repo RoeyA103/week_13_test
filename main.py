@@ -1,4 +1,4 @@
-from fastapi import FastAPI ,UploadFile ,HTTPException
+from fastapi import FastAPI ,UploadFile ,HTTPException , File
 import pandas as pd
 import shutil
 import uvicorn
@@ -12,23 +12,21 @@ def root():
     return {"message: healthy"}
 
 @app.post("/top-threats")
-def get_csv_file(file: UploadFile):
+def get_csv_file(file: UploadFile = File(...)):
     validation(file=file)
     save_csv_local(file)
     df = load_file(file.filename)
     
     df = data_manipulation(df)
-    terrorist_list = df_to_list_dict(df)
-    valid_list = basemodel_validation(terrorist_list)
-    res = res_format(valid_list)
-
-    save_contact_to_db(df.to_json())
+    valid_df = basemodel_validation(df)
+    res = res_format(valid_df)
+    save_contact_to_db(valid_df)
     return res
 
 
     
 
-def validation(file):
+def validation(file:UploadFile):
     if not file:
         raise HTTPException(status_code=400,detail="No file provided")
     if not file.filename.lower().endswith(('.csv',".xlsx",".xls")):
@@ -50,33 +48,24 @@ def load_file(file_name:str):
 def data_manipulation(df):
     df.sort_values(by="danger_rate",ascending=False,inplace=True)
     df = df.head(n=5)
-    df = df[["name","location","danger_rate"]]
+    return df
+   
+
+def basemodel_validation(df:pd.DataFrame):
+    valid = []
+    for idx , row in df.iterrows():
+        try:
+            model = Terrorist(**row.to_dict())
+            valid.append(model)
+        except:
+            pass
+    df = pd.DataFrame([m.model_dump() for m in valid])
     return df
 
-def df_to_list_dict(df):
-    terror = []
-    for col in df.values:
-        a= {}
-        a["name"] = col[0]
-        a["location"] = col[1]
-        a["danger_rate"] = col[2]
-        terror.append(a)
-    return terror    
 
-def basemodel_validation(terrorists:list[dict]):
-    res = []
-    for terrorist in terrorists:
-        try:
-            Terrorist(**terrorist)
-            res.append(terrorist)
-        except Exception:
-            pass
-    return res    
-
-
-def res_format(terrorists:list[dict]):
-    count = len(terrorists)
-    res = {"count":count,"top":terrorists}
+def res_format(df:pd.DataFrame):
+    count = len(df)
+    res = {"count":count,"top":df.to_dict(orient="records")}
     return res
 
 if __name__ == "__main__":
